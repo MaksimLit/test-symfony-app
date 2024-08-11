@@ -1,0 +1,56 @@
+  services:
+    nginx:
+      build:
+        context: Docker
+        dockerfile: nginx/Dockerfile
+      ports:
+        - "8081:80"
+      volumes:
+        - ./:/app
+      networks:
+        - default
+      depends_on:
+        - php-fpm
+
+    php-fpm:
+      build:
+        context: Docker
+        dockerfile: php-fpm/Dockerfile
+      environment:
+        APP_ENV: dev
+        APP_DEBUG: 1
+        PHP_IDE_CONFIG: serverName=API
+        DB_HOST: postgres
+        DB_USER: app
+        DB_PASSWORD: secret
+        DB_NAME: app
+      volumes:
+        - ./:/app
+
+    php-cli:
+      build:
+        context: Docker
+        dockerfile: php-cli/Dockerfile
+      environment:
+        APP_ENV: dev
+        APP_DEBUG: 1
+        DB_HOST: postgres
+        DB_USER: app
+        DB_PASSWORD: secret
+        DB_NAME: app
+      volumes:
+        - ./:/app
+
+    postgres:
+      image: postgres:16.4-alpine3.19
+      environment:
+        POSTGRES_USER: app
+        POSTGRES_PASSWORD: secret
+        POSTGRES_DB: app
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      ports:
+        - "54321:5432"
+
+  volumes:
+    postgres_data:
